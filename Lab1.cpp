@@ -3,31 +3,19 @@
 
 using namespace std;
 
-int main() {
-    string filename = "test.txt"; // Replace with the path to your text file
-    ifstream file(filename, ios::binary);
+const int byteCount = 256;
 
-    if (!file.is_open()) {
-        cerr << "Error: Unable to open the file." << endl;
-        return 1;
-    }
-
-    const int byteCount = 256;
-    int byteFrequency[byteCount] = { 0 };
-
-    char byte;
-    while (file.get(byte)) {
-        byteFrequency[static_cast<unsigned char>(byte)]++;
-    }
-
-    file.close();
-
+// Function to generate the histogram
+void generateHistogram(const int byteFrequency[]) {
     int maxFrequency = 0;
     for (int i = 0; i < byteCount; ++i) {
         if (byteFrequency[i] > maxFrequency) {
             maxFrequency = byteFrequency[i];
         }
     }
+
+    // Calculate the scaling factor
+    double scale = (maxFrequency > 0) ? static_cast<double>(20) / maxFrequency : 1.0;
 
     // Print the top border
     cout << "+";
@@ -36,14 +24,15 @@ int main() {
     }
     cout << "+" << endl;
 
-    for (int row = maxFrequency; row > 0; --row) {
+    for (int row = 20; row > 0; --row) {
         cout << "|";
         for (int i = 0; i < byteCount; ++i) {
-            if (byteFrequency[i] >= row) {
+            int scaledValue = static_cast<int>(byteFrequency[i] * scale);
+            if (scaledValue >= row) {
                 cout << "# ";
             }
             else {
-                cout << "  "; // Two spaces for characters without frequency
+                cout << "  ";
             }
         }
         cout << "|" << endl;
@@ -63,6 +52,26 @@ int main() {
         cout << character << ' ';
     }
     cout << "|" << endl;
+}
+
+int main() {
+    string filename = "Hamlet.txt";
+    ifstream file(filename, ios::binary);
+
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open the file." << endl;
+        return 1;
+    }
+
+    int byteFrequency[byteCount] = { 0 };
+    char byte;
+    while (file.get(byte)) {
+        byteFrequency[static_cast<unsigned char>(byte)]++;
+    }
+
+    file.close();
+
+    generateHistogram(byteFrequency);
 
     return 0;
 }
